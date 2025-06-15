@@ -3,11 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "homepage": "https://your-username.github.io/tempus-plaza",
   "scripts": {
     "dev": "vite",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -20,6 +22,7 @@
     "bootstrap": "^5.3.6",
     "bootstrap-icons": "^1.13.1",
     "debounce": "^2.2.0",
+    "gh-pages": "^6.3.0",
     "js-cookie": "^3.0.5",
     "masonry-layout": "^4.2.2",
     "passport-steam": "^1.0.18",
