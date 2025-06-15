@@ -1,22 +1,38 @@
 {
-  "name": "leaderboard-project",
+  "name": "tempus-plaza",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/free-regular-svg-icons": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/vue-fontawesome": "^3.0.8",
+    "apexcharts": "^4.7.0",
     "axios": "^1.9.0",
-    "vue": "^3.5.13",
+    "bootstrap": "^5.3.6",
+    "bootstrap-icons": "^1.13.1",
+    "js-cookie": "^3.0.5",
+    "masonry-layout": "^4.2.2",
+    "passport-steam": "^1.0.18",
+    "vue-clipboard2": "^0.3.3",
     "vue-router": "^4.5.1",
     "vuex": "^4.1.0"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@vitejs/plugin-vue": "^5.2.3",
+    "@vue/cli-service": "^5.0.8",
     "vite": "^6.2.4",
-    "vite-plugin-vue-devtools": "^7.7.2"
+    "vite-plugin-vue-devtools": "^7.7.2",
+    "vue": "^3.5.16",
+    "vue-loader": "^17.4.2"
   }
 }
