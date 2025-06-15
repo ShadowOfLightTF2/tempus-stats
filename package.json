@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "homepage": "https://shadowoflighttf2.github.io/tempus-plaza",
+  "homepage": "https://shadowoflighttf2.github.io/tempus-plaza/",
   "scripts": {
     "dev": "vite",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vite build",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist"
   },
