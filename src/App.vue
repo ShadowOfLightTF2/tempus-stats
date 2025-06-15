@@ -262,7 +262,7 @@ import Cookies from "js-cookie";
 import debounce from "debounce";
 
 const API_BASE_URL =
-  process.env.VUE_APP_API_BASE_URL || "http://localhost:3000";
+  import.meta.env.VITE_APP_API_BASE_URL || "http://localhost:3000";
 
 export default {
   name: "App",
