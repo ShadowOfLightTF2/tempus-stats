@@ -57,7 +57,6 @@
             <input
               type="text"
               v-model="searchQuery"
-              @input="onSearch"
               placeholder="Search..."
               class="search-input"
             />
@@ -97,13 +96,13 @@
         </div>
         <div class="d-flex align-items-center">
           <button
-            v-if="!isAuthenticated"
+            v-if="!user || !Object.keys(user).length"
             class="btn login-button"
             @click="loginWithSteam"
           >
             <i class="bi bi-steam"></i> Login with Steam
           </button>
-          <div v-if="isAuthenticated" class="dropdown">
+          <div v-if="user && Object.keys(user).length" class="dropdown">
             <button
               class="btn dropdown-toggle d-flex align-items-center"
               type="button"
@@ -260,48 +259,48 @@
 
 <script>
 import Cookies from "js-cookie";
+import debounce from "debounce";
+
+const API_BASE_URL =
+  process.env.VUE_APP_API_BASE_URL || "http://localhost:3000";
 
 export default {
   name: "App",
   data() {
     return {
-      authUser: JSON.parse(localStorage.getItem("user")) || null,
-      authToken: localStorage.getItem("jwt") || null,
       searchQuery: "",
       searchResults: null,
-      debounceTimer: null,
       rankPreference: "overall",
       gender: "male",
     };
   },
   computed: {
-    isAuthenticated() {
-      return !!this.authToken;
-    },
     user() {
       const userCookie = Cookies.get("user");
-      return userCookie ? JSON.parse(userCookie) : {};
+      if (userCookie) {
+        return JSON.parse(userCookie);
+      } else {
+        return {};
+      }
     },
   },
   methods: {
     closeDropdown() {
       this.searchResults = null;
     },
+
     loginWithSteam() {
-      window.location.href = "http://localhost:3000/auth/steam";
+      window.location.href = `${API_BASE_URL}/auth/steam`;
     },
     logout() {
       Cookies.remove("user");
-      localStorage.removeItem("jwt");
-      this.authUser = null;
-      this.authToken = null;
       this.$router.push({ name: "Home" });
     },
     async updateUserPreferences() {
       if (this.user && this.user.steamid) {
         try {
           const response = await fetch(
-            `http://localhost:3000/users/update-user/${this.user.playerid}`,
+            `${API_BASE_URL}/users/update-user/${this.user.playerid}`,
             {
               method: "POST",
               headers: {
@@ -324,18 +323,21 @@ export default {
             gender: this.gender,
           };
 
-          Cookies.set("user", JSON.stringify(updatedUser), { expires: 3650 });
-          window.location.reload();
+          Cookies.set("user", JSON.stringify(updatedUser), {
+            expires: 3650,
+            sameSite: "Lax",
+          });
         } catch (error) {
           console.error("Error updating user preferences:", error);
         }
       }
     },
+
     async goToProfile() {
       if (this.user && this.user.steamid) {
         try {
           const response = await fetch(
-            `http://localhost:3000/players/login/${this.user.steamid}`,
+            `${API_BASE_URL}/players/login/${this.user.steamid}`,
             {
               method: "GET",
               credentials: "include",
@@ -362,35 +364,40 @@ export default {
       this.$router.push({ name: "PlayerPage", params: { playerId } });
       this.searchResults = null;
     },
-    async onSearch() {
-      clearTimeout(this.debounceTimer);
-      this.debounceTimer = setTimeout(async () => {
-        if (this.searchQuery.trim()) {
-          try {
-            const response = await fetch("http://localhost:3000/search", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ query: this.searchQuery }),
-            });
+    async fetchSearchResults() {
+      if (this.searchQuery.trim()) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/search`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query: this.searchQuery }),
+          });
 
-            if (!response.ok) throw new Error("Failed to fetch search results");
-            const data = await response.json();
+          if (!response.ok) throw new Error("Failed to fetch search results");
+          const data = await response.json();
 
-            if (data.players && data.players.length > 20)
-              data.players = data.players.slice(0, 20);
-            if (data.maps && data.maps.length > 5)
-              data.maps = data.maps.slice(0, 5);
+          if (data.players && data.players.length > 20)
+            data.players = data.players.slice(0, 20);
+          if (data.maps && data.maps.length > 5)
+            data.maps = data.maps.slice(0, 5);
 
-            this.searchResults = data;
-          } catch (error) {
-            console.error("Error fetching search results:", error);
-          }
-        } else {
-          this.searchResults = null;
+          this.searchResults = data;
+        } catch (error) {
+          console.error("Error fetching search results:", error);
         }
-      }, 500);
+      } else {
+        this.searchResults = null;
+      }
+    },
+  },
+  created() {
+    this.debouncedSearch = debounce(this.fetchSearchResults, 500);
+  },
+  watch: {
+    searchQuery() {
+      this.debouncedSearch();
     },
   },
   mounted() {
@@ -407,7 +414,7 @@ export default {
       this.gender = user.gender;
     } else if (playerid) {
       console.log("URL parameters found, setting user data...");
-      fetch(`http://localhost:3000/users/${playerid}`)
+      fetch(`${API_BASE_URL}/users/${playerid}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -428,10 +435,11 @@ export default {
             gender: data.gender,
           };
 
-          Cookies.set("user", JSON.stringify(user), { expires: 3650 });
+          Cookies.set("user", JSON.stringify(user), {
+            expires: 3650,
+            sameSite: "Lax",
+          });
 
-          localStorage.setItem("jwt", "dummy");
-          this.authToken = "dummy";
           this.$router.replace({ path: this.$route.path, query: {} });
         })
         .catch((error) => {
@@ -441,9 +449,6 @@ export default {
       console.log("No URL parameters or user cookie found.");
       this.logout();
     }
-  },
-  beforeDestroy() {
-    clearTimeout(this.debounceTimer);
   },
 };
 </script>

@@ -332,7 +332,7 @@
                 background: var(--color-primary);
                 font-weight: bold;
                 width: 100%;
-                border-radius: 0 0 12px 12px;
+                border-radius: 0 0 0 0;
               "
             >
               Show more
@@ -849,7 +849,7 @@ export default {
 
 .class-checkbox input:checked + span,
 .type-checkbox input:checked + span {
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   background-color: var(--color-primary);
 }
@@ -857,7 +857,7 @@ export default {
 .class-checkbox:hover input:not(:checked) + span,
 .type-checkbox:hover input:not(:checked) + span {
   border-radius: 8px;
-  box-shadow: 0 0 0 1px var(--color-border, #444);
+  background-color: var(--color-primary);
 }
 
 .search-results-dropdown {
@@ -968,7 +968,8 @@ export default {
 }
 
 .tier-checkbox:hover,
-.rating-checkbox:hover {
+.rating-checkbox:hover,
+.group-checkbox:hover {
   border-radius: 4px;
   border-color: var(--color-border, #444);
   box-shadow: 0 0 0 1px var(--color-border, #444);
@@ -1260,7 +1261,8 @@ export default {
 
 .table-responsive {
   box-shadow: 0 0 0 1px var(--color-border, #444);
-  border-radius: 12px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   overflow: hidden;
   margin-bottom: 0px;
 }

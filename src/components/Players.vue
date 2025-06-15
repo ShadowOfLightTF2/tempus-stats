@@ -443,9 +443,6 @@ export default {
     async fetchPlayers(tableName, type, category, index) {
       if (this.initialLoad) this.loading = true;
       try {
-        console.log(
-          `http://localhost:3000/players/${tableName}/${type}/${category}/${index}`
-        );
         const response = await axios.get(
           `http://localhost:3000/players/${tableName}/${type}/${category}/${index}`
         );
@@ -469,7 +466,6 @@ export default {
     async fetchPlayersData(category, index) {
       if (this.initialLoad) this.loading = true;
       try {
-        console.log(category + " " + index);
         const response = await axios.get(
           `http://localhost:3000/players/${category}/${index}`
         );

@@ -767,9 +767,12 @@ export default {
           console.log("User not found");
           return;
         }
-        this.player.gender = data.gender;
-        this.player.rank_pref = data.rank_pref;
-        //this.player.launcher_pref = data.launcher_pref
+        this.player = {
+          ...this.player,
+          gender: data.gender,
+          rank_pref: data.rank_pref,
+          // launcher_pref: data.launcher_pref
+        };
         this.user = response.data[0];
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -799,6 +802,7 @@ export default {
         this.loading.ranks = false;
       }
     },
+
     async fetchPlayerRanks(playerId) {
       try {
         const response = await axios.get(

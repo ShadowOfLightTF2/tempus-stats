@@ -19,6 +19,7 @@
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
     "bootstrap-icons": "^1.13.1",
+    "debounce": "^2.2.0",
     "js-cookie": "^3.0.5",
     "masonry-layout": "^4.2.2",
     "passport-steam": "^1.0.18",
