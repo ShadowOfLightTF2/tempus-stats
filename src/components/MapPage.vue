@@ -17,17 +17,20 @@
         v-if="map"
         class="card map-banner mb-4 shadow"
         :style="{
-          background:
-            map && map.name
-              ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/maps/${map.name}.jpg') center/cover no-repeat`
-              : 'linear-gradient(135deg, var(--color-primary), var(--color-box))',
+          background: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/maps/${map.name}.jpg') center/cover no-repeat`,
           backgroundBlendMode: 'multiply',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           border: '1px solid rgba(42, 42, 42, 0.99)',
         }"
       >
-        <div class="row g-0">
+        <div
+          class="row g-0"
+          :style="{
+            background:
+              'linear-gradient(135deg, var(--color-primary), var(--color-box))',
+          }"
+        >
           <div
             class="col-md-12 d-flex flex-column align-items-center map-left p-4"
           >

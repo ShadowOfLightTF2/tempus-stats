@@ -4,38 +4,22 @@
       <div class="container justify-content-center">
         <ul class="navbar-nav">
           <li class="nav-item me-3">
-            <router-link
-              to="/"
-              class="nav-link"
-              style="color: var(--color-text); font-weight: bold"
-            >
+            <router-link to="/" class="nav-link nav-link-bold">
               <i class="bi bi-house"></i> Home
             </router-link>
           </li>
           <li class="nav-item me-3">
-            <router-link
-              to="/maps"
-              class="nav-link"
-              style="color: var(--color-text); font-weight: bold"
-            >
+            <router-link to="/maps" class="nav-link nav-link-bold">
               <i class="bi bi-globe"></i> Maps
             </router-link>
           </li>
           <li class="nav-item me-3">
-            <router-link
-              to="/players"
-              class="nav-link"
-              style="color: var(--color-text); font-weight: bold"
-            >
+            <router-link to="/players" class="nav-link nav-link-bold">
               <i class="bi bi-trophy"></i> Players
             </router-link>
           </li>
           <li class="nav-item me-3">
-            <router-link
-              to="/lookup"
-              class="nav-link"
-              style="color: var(--color-text); font-weight: bold"
-            >
+            <router-link to="/lookup" class="nav-link nav-link-bold">
               <i class="bi bi-search"></i> Lookup
             </router-link>
           </li>
@@ -75,9 +59,8 @@
                   v-for="map in searchResults.maps"
                   :key="map.id"
                   @click="goToMap(map.id)"
-                >
-                  {{ map.name || `Map ID: ${map.id}` }}
-                </li>
+                  v-html="sanitize(map.name || `Map ID: ${map.id}`)"
+                ></li>
               </ul>
             </div>
             <div v-if="searchResults.players.length">
@@ -87,22 +70,21 @@
                   v-for="player in searchResults.players"
                   :key="player.id"
                   @click="goToPlayer(player.id)"
-                >
-                  {{ player.name || `Player ID: ${player.id}` }}
-                </li>
+                  v-html="sanitize(player.name || `Player ID: ${player.id}`)"
+                ></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="d-flex align-items-center">
           <button
-            v-if="!user || !Object.keys(user).length"
+            v-if="!user || !user.steamid"
             class="btn login-button"
             @click="loginWithSteam"
           >
             <i class="bi bi-steam"></i> Login with Steam
           </button>
-          <div v-if="user && Object.keys(user).length" class="dropdown">
+          <div v-if="user && user.steamid" class="dropdown">
             <button
               class="btn dropdown-toggle d-flex align-items-center"
               type="button"
@@ -258,6 +240,7 @@
 </template>
 
 <script>
+import DOMPurify from "dompurify";
 import Cookies from "js-cookie";
 import debounce from "debounce";
 
@@ -272,16 +255,12 @@ export default {
       searchResults: null,
       rankPreference: "overall",
       gender: "male",
+      currentUser: null,
     };
   },
   computed: {
     user() {
-      const userCookie = Cookies.get("user");
-      if (userCookie) {
-        return JSON.parse(userCookie);
-      } else {
-        return {};
-      }
+      return this.currentUser;
     },
   },
   methods: {
@@ -293,14 +272,29 @@ export default {
       window.location.href = `${API_BASE_URL}/auth/steam`;
     },
     logout() {
-      Cookies.remove("user");
+      console.log(Cookies.get("user"), "user");
+      console.log(Cookies.get("session"), "session");
+      Cookies.remove("user", {
+        path: "/",
+        secure: false,
+        sameSite: "lax",
+      });
+      Cookies.remove("session", {
+        path: "/",
+        secure: false,
+        sameSite: "lax",
+      });
+      this.currentUser = null;
+      console.log(Cookies.get("user"));
       this.$router.push({ name: "Home" });
     },
     async updateUserPreferences() {
-      if (this.user && this.user.steamid) {
+      console.log("BRAAP", Cookies.get("user"));
+      if (this.currentUser && this.currentUser.steamid) {
+        // Check currentUser instead
         try {
           const response = await fetch(
-            `${API_BASE_URL}/users/update-user/${this.user.playerid}`,
+            `${API_BASE_URL}/users/update-user/${this.currentUser.playerid}`,
             {
               method: "POST",
               headers: {
@@ -318,11 +312,12 @@ export default {
           console.log("User preferences updated:", data);
 
           const updatedUser = {
-            ...this.user,
+            ...this.currentUser, // Use currentUser
             rankpref: this.rankPreference,
             gender: this.gender,
           };
 
+          this.currentUser = updatedUser; // Update reactive data
           Cookies.set("user", JSON.stringify(updatedUser), {
             expires: 3650,
             sameSite: "Lax",
@@ -334,26 +329,29 @@ export default {
     },
 
     async goToProfile() {
-      if (this.user && this.user.steamid) {
-        try {
-          const response = await fetch(
-            `${API_BASE_URL}/players/login/${this.user.steamid}`,
-            {
-              method: "GET",
-              credentials: "include",
-            }
-          );
-          if (!response.ok) throw new Error("Failed to fetch playerId");
-          const data = await response.json();
-          const playerId = data[0].id;
-          if (playerId) {
-            this.$router.push({ name: "PlayerPage", params: { playerId } });
-          } else {
-            throw new Error("playerId missing in response");
+      if (!this.currentUser || !this.currentUser.steamid) {
+        // Check currentUser
+        console.log("No user logged in or invalid user data.");
+        return;
+      }
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/players/login/${this.currentUser.steamid}`,
+          {
+            method: "GET",
+            credentials: "include",
           }
-        } catch (error) {
-          console.error("Failed to login to backend:", error);
+        );
+        if (!response.ok) throw new Error("Failed to fetch playerId");
+        const data = await response.json();
+        const playerId = data[0].id;
+        if (playerId) {
+          this.$router.push({ name: "PlayerPage", params: { playerId } });
+        } else {
+          throw new Error("playerId missing in response");
         }
+      } catch (error) {
+        console.error("Failed to login to backend:", error);
       }
     },
     goToMap(mapId) {
@@ -391,6 +389,9 @@ export default {
         this.searchResults = null;
       }
     },
+    sanitize(text) {
+      return DOMPurify.sanitize(text);
+    },
   },
   created() {
     this.debouncedSearch = debounce(this.fetchSearchResults, 500);
@@ -401,53 +402,19 @@ export default {
     },
   },
   mounted() {
-    const params = new URLSearchParams(window.location.search);
-    const playerid = params.get("playerid");
-    const name = params.get("name");
-    const avatar = params.get("avatar");
-    const steamid = params.get("steamid");
-
     const userCookie = Cookies.get("user");
     if (userCookie) {
-      const user = JSON.parse(userCookie);
-      this.rankPreference = user.rankpref;
-      this.gender = user.gender;
-    } else if (playerid) {
-      console.log("URL parameters found, setting user data...");
-      fetch(`${API_BASE_URL}/users/${playerid}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Fetched user data:", data);
-          this.rankPreference = data.rank_pref;
-          this.gender = data.gender;
-
-          const user = {
-            name: name,
-            avatar: avatar,
-            steamid: steamid,
-            playerid: data.player_id,
-            rankpref: data.rank_pref,
-            gender: data.gender,
-          };
-
-          Cookies.set("user", JSON.stringify(user), {
-            expires: 3650,
-            sameSite: "Lax",
-          });
-
-          this.$router.replace({ path: this.$route.path, query: {} });
-        })
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
-        });
+      try {
+        const user = JSON.parse(userCookie);
+        this.currentUser = user; // Set reactive data
+        this.rankPreference = user.rankpref || "overall";
+        this.gender = user.gender || "male";
+      } catch (error) {
+        console.error("Error parsing user cookie:", error);
+        this.logout();
+      }
     } else {
-      console.log("No URL parameters or user cookie found.");
-      this.logout();
+      this.currentUser = null; // Ensure it's null
     }
   },
 };
@@ -530,6 +497,11 @@ html {
 
 .bi-steam {
   color: var(--color-text);
+}
+
+.nav-link-bold {
+  color: var(--color-text);
+  font-weight: bold;
 }
 </style>
 

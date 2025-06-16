@@ -144,7 +144,12 @@
             </tbody>
           </table>
         </div>
-        <div class="maps-footer">
+        <div v-if="showMoreLoading" class="text-center">
+          <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading records...</span>
+          </div>
+        </div>
+        <div v-else class="maps-footer">
           <button
             v-if="displayedSoldierEntries.length < selectedRecords.length"
             @click="showMoreSoldierEntries"
@@ -263,6 +268,7 @@ export default {
     return {
       selectedRecords: [],
       loading: false,
+      showMoreLoading: false,
       error: null,
       soldierDisplayCount: 100,
       demomanDisplayCount: 100,
@@ -277,18 +283,20 @@ export default {
       selectedIndex: "",
       selectedCourseIndex: "",
       selectedBonusIndex: "",
+      soldierOffset: 0,
+      demomanOffset: 0,
     };
   },
   computed: {
     displayedSoldierEntries() {
       return this.selectedRecords
         .filter((record) => record.class === "soldier")
-        .slice(0, this.soldierDisplayCount);
+        .slice(0, this.soldierDisplayCount + this.soldierOffset);
     },
     displayedDemomanEntries() {
       return this.selectedRecords
         .filter((record) => record.class === "demoman")
-        .slice(0, this.demomanDisplayCount);
+        .slice(0, this.demomanDisplayCount + this.demomanOffset);
     },
   },
   mounted() {
@@ -363,55 +371,84 @@ export default {
         this.loading = false;
       }
     },
-    async fetchLeaderboardData() {
-      this.loading = true;
+    async fetchLeaderboardData(offset = 0, limit = 100) {
+      if ((offset = 0)) {
+        this.loading = true;
+      } else {
+        this.showMoreLoading = true;
+      }
       this.error = null;
       try {
         const response = await axios.get(
-          `http://localhost:3000/maps/${this.mapId}/records`
+          `http://localhost:3000/maps/${this.mapId}/records/${offset}/${limit}`
         );
-        this.selectedRecords = response.data;
+        if (offset === 0) {
+          this.selectedRecords = response.data;
+        } else {
+          this.selectedRecords = [...this.selectedRecords, ...response.data];
+        }
         document.title = "Tempus plaza - " + response.data[0].map_name;
       } catch (error) {
         this.error = "Error fetching leaderboard data.";
         console.error("Error fetching leaderboard data:", error);
       } finally {
         this.loading = false;
+        this.showMoreLoading = false;
       }
     },
-    async fetchCourseRecords(courseIndex) {
-      this.loading = true;
+    async fetchCourseRecords(courseIndex, offset = 0, limit = 100) {
+      if ((offset = 0)) {
+        this.loading = true;
+      } else {
+        this.showMoreLoading = true;
+      }
       this.error = null;
       try {
         const response = await axios.get(
-          `http://localhost:3000/maps/${this.mapId}/course/${courseIndex}/records`
+          `http://localhost:3000/maps/${this.mapId}/course/${courseIndex}/records/${offset}/${limit}`
         );
-        this.selectedRecords = response.data;
+        if (offset === 0) {
+          this.selectedRecords = response.data;
+        } else {
+          this.selectedRecords = [...this.selectedRecords, ...response.data];
+        }
       } catch (error) {
         this.error = "Error fetching course records.";
         console.error("Error fetching course records:", error);
       } finally {
         this.loading = false;
+        this.showMoreLoading = false;
       }
     },
-    async fetchBonusRecords(bonusIndex) {
-      this.loading = true;
+    async fetchBonusRecords(bonusIndex, offset = 0, limit = 100) {
+      if ((offset = 0)) {
+        this.loading = true;
+      } else {
+        this.showMoreLoading = true;
+      }
       this.error = null;
       try {
         const response = await axios.get(
-          `http://localhost:3000/maps/${this.mapId}/bonus/${bonusIndex}/records`
+          `http://localhost:3000/maps/${this.mapId}/bonus/${bonusIndex}/records/${offset}/${limit}`
         );
-        this.selectedRecords = response.data;
+        if (offset === 0) {
+          this.selectedRecords = response.data;
+        } else {
+          this.selectedRecords = [...this.selectedRecords, ...response.data];
+        }
       } catch (error) {
         this.error = "Error fetching bonus records.";
         console.error("Error fetching bonus records:", error);
       } finally {
         this.loading = false;
+        this.showMoreLoading = false;
       }
     },
     selectRecords(type, index) {
       this.selectedType = type.charAt(0).toUpperCase() + type.slice(1);
       this.selectedIndex = index !== undefined ? index : null;
+      this.soldierOffset = 0;
+      this.demomanOffset = 0;
 
       if (type === "map") {
         this.fetchLeaderboardData();
@@ -461,10 +498,53 @@ export default {
       });
     },
     showMoreSoldierEntries() {
-      this.soldierDisplayCount += 100;
+      this.soldierOffset += 100;
+      if (this.selectedTypePill === "Map") {
+        this.fetchLeaderboardData(
+          0,
+          this.soldierDisplayCount + this.soldierOffset
+        );
+      } else if (
+        this.selectedTypePill === "Course" &&
+        this.selectedCourseIndex
+      ) {
+        this.fetchCourseRecords(
+          this.selectedCourseIndex,
+          0,
+          this.soldierDisplayCount + this.soldierOffset
+        );
+      } else if (this.selectedTypePill === "Bonus" && this.selectedBonusIndex) {
+        this.fetchBonusRecords(
+          this.selectedBonusIndex,
+          0,
+          this.soldierDisplayCount + this.soldierOffset
+        );
+      }
     },
+
     showMoreDemomanEntries() {
-      this.demomanDisplayCount += 100;
+      this.demomanOffset += 100;
+      if (this.selectedTypePill === "Map") {
+        this.fetchLeaderboardData(
+          0,
+          this.demomanDisplayCount + this.demomanOffset
+        );
+      } else if (
+        this.selectedTypePill === "Course" &&
+        this.selectedCourseIndex
+      ) {
+        this.fetchCourseRecords(
+          this.selectedCourseIndex,
+          0,
+          this.demomanDisplayCount + this.demomanOffset
+        );
+      } else if (this.selectedTypePill === "Bonus" && this.selectedBonusIndex) {
+        this.fetchBonusRecords(
+          this.selectedBonusIndex,
+          0,
+          this.demomanDisplayCount + this.demomanOffset
+        );
+      }
     },
   },
 };

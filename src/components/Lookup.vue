@@ -37,19 +37,32 @@
                 v-for="player in searchResults.players"
                 :key="player.id"
                 @click="selectPlayer(player.id)"
-              >
-                {{ player.name || `Player ID: ${player.id}` }}
-              </li>
+                v-html="sanitize(player.name) || `Player ID: ${player.id}`"
+              ></li>
             </ul>
           </div>
         </div>
       </div>
+      <div
+        v-if="searchResults && searchResults.players.length"
+        class="dropdown-overlay"
+        @click="searchResults = null"
+        style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          z-index: 999;
+          background: transparent;
+        "
+      ></div>
     </div>
     <hr class="row-divider" style="width: 75%" />
 
     <!-- Player Name Display -->
     <div v-if="playerId" class="player-name-display">
-      <h2>{{ selectedPlayerName || "Selected Player" }}</h2>
+      <h2 v-html="sanitize(selectedPlayerName) || 'Selected Player'"></h2>
     </div>
     <hr class="row-divider" style="width: 75%" v-if="playerId" />
 
@@ -262,7 +275,7 @@
             Clear filters
           </button>
           <span class="text-light"
-            >Displaying {{ filteredAndSortedItems.length }} of
+            >Displaying {{ filteredSortedItems.length }} of
             {{ totalRecordsLength() }} records</span
           >
         </div>
@@ -300,7 +313,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(record, index) in filteredRecords" :key="index">
+              <tr v-for="record in filteredRecords" :key="record.id">
                 <td>{{ record.map_name }}</td>
                 <td>{{ record.type.slice(0, 1).toUpperCase() }}</td>
                 <td>
@@ -325,15 +338,9 @@
           </table>
           <div class="maps-footer">
             <button
-              v-if="displayCount < filteredItems.length"
+              v-if="displayCount < filteredSortedItems.length"
               @click="showMore"
-              class="btn btn-dark update-button"
-              style="
-                background: var(--color-primary);
-                font-weight: bold;
-                width: 100%;
-                border-radius: 0 0 0 0;
-              "
+              class="btn btn-dark update-button show-more-btn"
             >
               Show more
             </button>
@@ -345,6 +352,7 @@
 </template>
 
 <script>
+import DOMPurify from "dompurify";
 import Cookies from "js-cookie";
 import { formatDuration } from "@/utils/calculations.js";
 const API_BASE_URL =
@@ -401,7 +409,7 @@ export default {
         return null;
       }
     },
-    filteredItems() {
+    filteredSortedItems() {
       let recordsToFilter = [];
 
       if (this.selectedTypes.length === 0) {
@@ -422,7 +430,7 @@ export default {
         }
       }
 
-      return recordsToFilter.filter((record) => {
+      const filtered = recordsToFilter.filter((record) => {
         if (
           this.selectedClasses.length > 0 &&
           !this.selectedClasses.includes(record.class)
@@ -466,9 +474,8 @@ export default {
 
         return true;
       });
-    },
-    filteredAndSortedItems() {
-      return this.filteredItems.slice().sort((a, b) => {
+
+      return filtered.sort((a, b) => {
         if (this.sortByDate === "newest") {
           return b.date - a.date;
         } else if (this.sortByDate === "oldest") {
@@ -521,7 +528,6 @@ export default {
   },
   mounted() {
     document.title = "Tempus plaza - Lookup";
-    document.addEventListener("click", (event) => this.closeDropdown(event));
 
     const userCookie = Cookies.get("user");
     let user = null;
@@ -539,6 +545,9 @@ export default {
     }
   },
   methods: {
+    sanitize(str) {
+      return DOMPurify.sanitize(str || "");
+    },
     showMore() {
       this.displayCount += 300;
       this.applyFilters();
@@ -609,7 +618,7 @@ export default {
     },
     selectSortOption(value) {
       this.sortByDate = value;
-      this.sortRecords();
+      this.applyFilters();
     },
     async fetchRecords() {
       this.loading = true;
@@ -652,32 +661,10 @@ export default {
       }
     },
     applyFilters() {
-      this.filteredRecords = this.filteredItems.slice(0, this.displayCount);
-      this.sortRecords();
-    },
-    sortRecords() {
-      this.filteredRecords.sort((a, b) => {
-        switch (this.sortByDate) {
-          case "newest":
-            return b.date - a.date;
-          case "oldest":
-            return a.date - b.date;
-          case "highestRank":
-            return a.rank - b.rank;
-          case "lowestRank":
-            return b.rank - a.rank;
-          case "highestPercentage":
-            return b.completion_count / b.rank - a.completion_count / a.rank;
-          case "lowestPercentage":
-            return a.completion_count / a.rank - b.completion_count / b.rank;
-          case "shortestDuration":
-            return a.duration - b.duration;
-          case "longestDuration":
-            return b.duration - a.duration;
-          default:
-            return 0;
-        }
-      });
+      this.filteredRecords = this.filteredSortedItems.slice(
+        0,
+        this.displayCount
+      );
     },
     clearAllFilters() {
       this.selectedClasses = [];
@@ -688,11 +675,6 @@ export default {
       this.selectedDemomanRatings = [];
       this.applyFilters();
     },
-    closeDropdown(event) {
-      if (!event.target.closest(".search-container")) {
-        this.searchResults = null;
-      }
-    },
     onFilterChange() {
       this.applyFilters();
     },
@@ -701,7 +683,6 @@ export default {
     },
   },
   beforeDestroy() {
-    document.removeEventListener("click", this.closeDropdown);
     clearTimeout(this.debounceTimer);
   },
 };
@@ -1325,6 +1306,13 @@ export default {
 .player-name-display h2 {
   color: var(--color-text);
   font-size: 2rem;
+}
+
+.show-more-btn {
+  background: var(--color-primary);
+  font-weight: bold;
+  width: 100%;
+  border-radius: 0 0 0 0;
 }
 
 @media (max-width: 767.98px) {

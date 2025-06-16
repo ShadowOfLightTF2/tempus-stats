@@ -18,13 +18,13 @@ const routes = [
     name: 'Maps',
     component: Maps,
   },
-  { 
+  {
     path: '/maps/:mapId',
     name: 'MapPage',
     component: MapPage,
     props: route => ({
       mapId: Number(route.params.mapId)
-    })    
+    })
   },
   {
     path: '/maps/:mapId/records',
@@ -55,7 +55,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/tempus-plaza/'),
   routes,
 });
 

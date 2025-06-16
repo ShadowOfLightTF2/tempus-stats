@@ -118,7 +118,7 @@
                     :src="`${player.steam_avatar}`"
                     alt="Steam Avatar"
                     class="avatar"
-                    onerror="this.src='/avatars/golly.jpg'"
+                    @error="handleError"
                   />
                   {{ player.name }}
                 </td>
@@ -193,7 +193,7 @@
                     :src="`${player.steam_avatar}`"
                     alt="Avatar"
                     class="avatar"
-                    onerror="this.src='/avatars/golly.jpg'"
+                    @error="handleError"
                   />
                   {{ player.name }}
                 </td>
@@ -288,37 +288,36 @@ export default {
     },
   },
   methods: {
+    handleError(e) {
+      const fallback = `${import.meta.env.BASE_URL}avatars/default-avatar.jpg`;
+      if (e.target.src !== fallback) {
+        e.target.src = fallback;
+      }
+    },
     selectCategory(category) {
       this.selectedCategory = category;
       const defaultItem = this.dropdowns[category][0];
       this.selectItem(category, defaultItem);
     },
     initializeFromRoute() {
-      // Get category and item from route params, with defaults
       const category = this.$route.params.category || "points";
       const item = this.$route.params.item || "Combined";
 
-      // Validate category exists
       if (!this.categoryNames.includes(category)) {
-        // If invalid category, redirect to default
         this.updateRoute("points", "Combined");
         return;
       }
 
-      // Set the values and fetch data
       this.selectedCategory = category;
       this.selectedItem = decodeURIComponent(item);
 
-      // Determine if this is a count item
       this.points = !this.selectedItem.includes("(count)");
 
       this.fetchDataForCurrentSelection(0);
     },
     updateRoute(category, item) {
-      // Encode the item for URL safety
       const encodedItem = encodeURIComponent(item);
 
-      // Only push route if it's different from current route
       if (
         this.$route.params.category !== category ||
         this.$route.params.item !== encodedItem
@@ -332,7 +331,6 @@ export default {
             },
           })
           .catch((err) => {
-            // Handle navigation duplicated error silently
             if (err.name !== "NavigationDuplicated") {
               console.error("Navigation error:", err);
             }
