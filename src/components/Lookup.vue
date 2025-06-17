@@ -61,8 +61,15 @@
     <hr class="row-divider" style="width: 75%" />
 
     <!-- Player Name Display -->
-    <div v-if="playerId" class="player-name-display">
-      <h2 v-html="sanitize(selectedPlayerName) || 'Selected Player'"></h2>
+    <div
+      v-if="playerId"
+      class="player-name-display"
+      @click="goToPlayer(playerId)"
+    >
+      <h2
+        class="clickable"
+        v-html="sanitize(selectedPlayerName) || 'Selected Player'"
+      ></h2>
     </div>
     <hr class="row-divider" style="width: 75%" v-if="playerId" />
 
@@ -314,12 +321,14 @@
             </thead>
             <tbody>
               <tr v-for="record in filteredRecords" :key="record.id">
-                <td>{{ record.map_name }}</td>
-                <td>{{ record.type.slice(0, 1).toUpperCase() }}</td>
+                <td class="clickable" @click="goToMap(record.map_id)">
+                  {{ record.map_name }}
+                </td>
+                <td>{{ getRecordType(record.type) }}</td>
                 <td>
                   <img
                     :src="`/icons/${record.class}.png`"
-                    :alt="`${record.class} Icon`"
+                    :alt="`${record.class}`"
                     class="class-icon"
                   />
                 </td>
@@ -545,6 +554,32 @@ export default {
     }
   },
   methods: {
+    goToPlayer(playerId) {
+      this.$router.push({
+        name: "PlayerPage",
+        params: { playerId: playerId },
+      });
+    },
+    goToMap(mapId) {
+      this.$router.push({
+        name: "Records",
+        params: { mapId: mapId },
+      });
+    },
+    getRecordType(type) {
+      const firstLetter = type.slice(0, 1).toUpperCase();
+      switch (firstLetter) {
+        case "M":
+          return "🌍";
+        case "C":
+          return "🚩";
+        case "B":
+          return "⭐";
+        default:
+          return "";
+      }
+    },
+
     sanitize(str) {
       return DOMPurify.sanitize(str || "");
     },
@@ -691,6 +726,15 @@ export default {
 <style scoped>
 .bg-dark-custom {
   background: var(--color-background);
+}
+
+.clickable {
+  cursor: pointer;
+  color: var(--color-text-clickable) !important;
+}
+
+.clickable:hover {
+  background-color: var(--color-primary) !important;
 }
 
 .text-small {

@@ -23,6 +23,11 @@
               <i class="bi bi-search"></i> Lookup
             </router-link>
           </li>
+          <li class="nav-item me-3">
+            <router-link to="/donate" class="nav-link nav-link-bold">
+              <i class="bi bi-heart"></i> Donate
+            </router-link>
+          </li>
         </ul>
         <div class="search-container" @click.stop>
           <div class="search-input-wrapper">
@@ -291,7 +296,6 @@ export default {
     async updateUserPreferences() {
       console.log("BRAAP", Cookies.get("user"));
       if (this.currentUser && this.currentUser.steamid) {
-        // Check currentUser instead
         try {
           const response = await fetch(
             `${API_BASE_URL}/users/update-user/${this.currentUser.playerid}`,
@@ -312,12 +316,12 @@ export default {
           console.log("User preferences updated:", data);
 
           const updatedUser = {
-            ...this.currentUser, // Use currentUser
+            ...this.currentUser,
             rankpref: this.rankPreference,
             gender: this.gender,
           };
 
-          this.currentUser = updatedUser; // Update reactive data
+          this.currentUser = updatedUser;
           Cookies.set("user", JSON.stringify(updatedUser), {
             expires: 3650,
             sameSite: "Lax",
@@ -330,7 +334,6 @@ export default {
 
     async goToProfile() {
       if (!this.currentUser || !this.currentUser.steamid) {
-        // Check currentUser
         console.log("No user logged in or invalid user data.");
         return;
       }
@@ -500,8 +503,9 @@ html {
 }
 
 .nav-link-bold {
-  color: var(--color-text);
+  color: #ffffff !important;
   font-weight: bold;
+  border-radius: 8px;
 }
 </style>
 
@@ -514,10 +518,14 @@ html {
 }
 
 .dropdown-toggle {
-  border-radius: 0;
+  border-radius: 8px;
   border: 0;
   background: var(--color-dark);
   color: var(--color-text);
+}
+
+.login-button {
+  border-radius: 8px;
 }
 
 .dropdown-toggle:hover {

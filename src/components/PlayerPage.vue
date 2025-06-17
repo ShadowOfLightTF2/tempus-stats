@@ -153,6 +153,72 @@
           </div>
         </div>
       </div>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card chart-container">
+            <div class="card-header">
+              <h4 class="text-center mb-0">Soldier points history</h4>
+            </div>
+            <div class="card-body">
+              <div v-if="loading.points" class="text-center">
+                <div class="spinner-border text-light" role="status">
+                  <span class="visually-hidden">Loading chart...</span>
+                </div>
+              </div>
+              <apexchart
+                v-else
+                type="line"
+                height="250"
+                :options="soldierChartOptions"
+                :series="soldierChartSeries"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card chart-container">
+            <div class="card-header">
+              <h4 class="text-center mb-0">Overall points history</h4>
+            </div>
+            <div class="card-body">
+              <div v-if="loading.points" class="text-center">
+                <div class="spinner-border text-light" role="status">
+                  <span class="visually-hidden">Loading chart...</span>
+                </div>
+              </div>
+              <apexchart
+                v-else
+                type="line"
+                height="250"
+                :options="overallChartOptions"
+                :series="overallChartSeries"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card chart-container">
+            <div class="card-header">
+              <h4 class="text-center mb-0">Demoman points history</h4>
+            </div>
+            <div class="card-body">
+              <div v-if="loading.points" class="text-center">
+                <div class="spinner-border text-light" role="status">
+                  <span class="visually-hidden">Loading chart...</span>
+                </div>
+              </div>
+              <apexchart
+                v-else
+                type="line"
+                height="250"
+                :options="demomanChartOptions"
+                :series="demomanChartSeries"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="row main-content-wrapper">
         <div class="col-md-3 stats-boxes">
           <!-- Soldier stats on the left -->
@@ -448,6 +514,7 @@
 
 <script>
 import axios from "axios";
+import VueApexCharts from "vue3-apexcharts";
 import { formatDuration } from "@/utils/calculations.js";
 import { formatDate } from "@/utils/calculations.js";
 
@@ -460,6 +527,9 @@ export default {
       type: Number,
       required: true,
     },
+  },
+  components: {
+    apexchart: VueApexCharts,
   },
   data: () => ({
     player: {
@@ -513,6 +583,7 @@ export default {
       shared: true,
       ranks: true,
       stats: true,
+      points: true,
     },
     playerNotFound: false,
     stats: {
@@ -555,6 +626,163 @@ export default {
     },
     sharedTimesSoldier: [],
     sharedTimesDemoman: [],
+    pointsHistory: [],
+    overallChartOptions: {
+      chart: {
+        type: "line",
+        height: 250,
+        background: "var(--color-row)",
+        toolbar: {
+          show: false,
+        },
+        zoom: {
+          enabled: false,
+        },
+      },
+      theme: {
+        mode: "dark",
+      },
+      colors: ["#FF6B6B"],
+      stroke: {
+        curve: "smooth",
+        width: 3,
+      },
+      grid: {
+        borderColor: "#444",
+        strokeDashArray: 5,
+      },
+      xaxis: {
+        type: "datetime",
+        labels: {
+          style: {
+            colors: "#aaa",
+          },
+        },
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: "#aaa",
+          },
+        },
+      },
+      tooltip: {
+        theme: "dark",
+        x: {
+          format: "dd MMM yyyy",
+        },
+      },
+      legend: {
+        labels: {
+          colors: "#fff",
+        },
+      },
+    },
+    overallChartSeries: [],
+    soldierChartOptions: {
+      chart: {
+        type: "line",
+        height: 250,
+        background: "var(--color-row)",
+        toolbar: {
+          show: false,
+        },
+        zoom: {
+          enabled: false,
+        },
+      },
+      theme: {
+        mode: "dark",
+      },
+      colors: ["#4ECDC4"],
+      stroke: {
+        curve: "smooth",
+        width: 3,
+      },
+      grid: {
+        borderColor: "#444",
+        strokeDashArray: 5,
+      },
+      xaxis: {
+        type: "datetime",
+        labels: {
+          style: {
+            colors: "#aaa",
+          },
+        },
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: "#aaa",
+          },
+        },
+      },
+      tooltip: {
+        theme: "dark",
+        x: {
+          format: "dd MMM yyyy",
+        },
+      },
+      legend: {
+        labels: {
+          colors: "#fff",
+        },
+      },
+    },
+    soldierChartSeries: [],
+    demomanChartOptions: {
+      chart: {
+        type: "line",
+        height: 250,
+        background: "var(--color-row)",
+        toolbar: {
+          show: false,
+        },
+        zoom: {
+          enabled: false,
+        },
+      },
+      theme: {
+        mode: "dark",
+      },
+      colors: ["#45B7D1"],
+      stroke: {
+        curve: "smooth",
+        width: 3,
+      },
+      grid: {
+        borderColor: "#444",
+        strokeDashArray: 5,
+      },
+      xaxis: {
+        type: "datetime",
+        labels: {
+          style: {
+            colors: "#aaa",
+          },
+        },
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: "#aaa",
+          },
+        },
+      },
+      tooltip: {
+        theme: "dark",
+        x: {
+          format: "dd MMM yyyy",
+        },
+      },
+      legend: {
+        labels: {
+          colors: "#fff",
+        },
+      },
+    },
+    demomanChartSeries: [],
   }),
   computed: {
     currentRecords() {
@@ -589,6 +817,7 @@ export default {
       this.fetchPlayerStats(this.playerId),
       this.fetchRecentRecords(this.playerId),
       this.fetchSharedTimes(this.playerId),
+      this.fetchPlayerPoints(this.playerId),
     ]);
   },
   watch: {
@@ -617,11 +846,63 @@ export default {
           this.fetchPlayerStats(newId);
           this.fetchRecentRecords(newId);
           this.fetchSharedTimes(newId);
+          this.fetchPlayerPoints(newId);
         }
       },
     },
   },
   methods: {
+    async fetchPlayerPoints(playerId) {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/players/${playerId}/points`
+        );
+        this.pointsHistory = response.data;
+        this.updateChartData();
+      } catch (error) {
+        console.error("Error fetching player points:", error);
+      }
+    },
+
+    updateChartData() {
+      if (!this.pointsHistory.length) return;
+
+      const sortedData = [...this.pointsHistory].sort(
+        (a, b) => a.date - b.date
+      );
+
+      this.overallChartSeries = [
+        {
+          name: "Overall Points",
+          data: sortedData.map((point) => ({
+            x: point.date * 1000,
+            y: point.overall_points,
+          })),
+        },
+      ];
+
+      this.soldierChartSeries = [
+        {
+          name: "Soldier Points",
+          data: sortedData.map((point) => ({
+            x: point.date * 1000,
+            y: point.soldier_points,
+          })),
+        },
+      ];
+
+      this.demomanChartSeries = [
+        {
+          name: "Demoman Points",
+          data: sortedData.map((point) => ({
+            x: point.date * 1000,
+            y: point.demoman_points,
+          })),
+        },
+      ];
+
+      this.loading.points = false;
+    },
     loadMoreRecords() {
       const tab = this.currentTab;
       if (this.canShowMore) {
@@ -979,81 +1260,94 @@ export default {
     },
     async fetchSharedTimes(playerId) {
       try {
-        let endpoint = "/shared-top-times";
-        this.player.shared_soldier_type = "Top time buddies";
-        this.player.shared_demoman_type = "Top time buddies";
-        const responseStats = await axios.get(
-          `${API_BASE_URL}/players/${playerId}/tt-amount`
-        );
-        if (responseStats.data[0].soldier_maps_count === 0) {
-          endpoint = "/shared-g1-times";
-          this.player.shared_soldier_type = "Group 1 buddies";
-        }
-        if (responseStats.data[0].demoman_maps_count === 0) {
-          endpoint = "/shared-g1-times";
-          this.player.shared_demoman_type = "Group 1 buddies";
-        }
+        let classType = "";
+        let placement = 10;
+        let sharedSoldiers = [];
+        let sharedDemomans = [];
 
-        const response = await axios.get(
-          `${API_BASE_URL}/players/${playerId}${endpoint}`
-        );
-        const sharedTimes = response.data;
+        try {
+          const responseStats = await axios.get(
+            `${API_BASE_URL}/players/${playerId}/tt-amount`
+          );
+          const stats = responseStats.data?.[0];
 
-        const playerCountsSoldier = {};
-        const playerCountsDemoman = {};
+          if (!stats) {
+            console.error("Stats response is invalid:", responseStats.data);
+            return;
+          }
 
-        sharedTimes.forEach((record) => {
-          if (record.player_id !== playerId) {
-            const playerName = record.player_name;
-            const otherPlayerId = record.player_id;
-            if (record.class === "soldier") {
-              if (playerCountsSoldier[playerName]) {
-                playerCountsSoldier[playerName].count++;
-              } else {
-                playerCountsSoldier[playerName] = {
-                  count: 1,
-                  playerId: otherPlayerId,
-                };
-              }
-            } else if (record.class === "demoman") {
-              if (playerCountsDemoman[playerName]) {
-                playerCountsDemoman[playerName].count++;
-              } else {
-                playerCountsDemoman[playerName] = {
-                  count: 1,
-                  playerId: otherPlayerId,
-                };
-              }
+          if (stats.soldier_maps_count === 0) {
+            try {
+              classType = "soldier";
+              placement = 11;
+              this.player.shared_soldier_type = "Group 1 buddies";
+              const responseSoldier = await axios.get(
+                `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
+              );
+              sharedSoldiers = responseSoldier.data;
+            } catch (e) {
+              console.error("Soldier group1 fetch failed:", e);
+            }
+          } else {
+            try {
+              classType = "soldier";
+              placement = 10;
+              this.player.shared_soldier_type = "Top time buddies";
+              const responseSoldier = await axios.get(
+                `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
+              );
+              sharedSoldiers = responseSoldier.data;
+            } catch (e) {
+              console.error("Soldier toptime fetch failed:", e);
             }
           }
-        });
 
-        const playerCountsArraySoldier = Object.entries(
-          playerCountsSoldier
-        ).map(([playerName, data]) => ({
-          playerName,
-          count: data.count,
-          playerId: data.playerId,
-        }));
+          console.log("BRAAP");
 
-        const playerCountsArrayDemoman = Object.entries(
-          playerCountsDemoman
-        ).map(([playerName, data]) => ({
-          playerName,
-          count: data.count,
-          playerId: data.playerId,
-        }));
+          if (stats.demoman_maps_count === 0) {
+            try {
+              classType = "demoman";
+              placement = 11;
+              this.player.shared_demoman_type = "Group 1 buddies";
+              const responseDemoman = await axios.get(
+                `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
+              );
+              sharedDemomans = responseDemoman.data;
+            } catch (e) {
+              console.error("Demoman group1 fetch failed:", e);
+            }
+          } else {
+            try {
+              classType = "demoman";
+              placement = 10;
+              this.player.shared_demoman_type = "Top time buddies";
+              const responseDemoman = await axios.get(
+                `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
+              );
+              console.log(responseDemoman);
+              sharedDemomans = responseDemoman.data;
+            } catch (e) {
+              console.error("Demoman toptime fetch failed:", e);
+            }
+          }
+        } catch (e) {
+          console.error("General fetch error:", e);
+        }
 
-        const top5PlayersSoldier = playerCountsArraySoldier
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 5);
-
-        const top5PlayersDemoman = playerCountsArrayDemoman
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 5);
-
-        this.sharedTimesSoldier = top5PlayersSoldier;
-        this.sharedTimesDemoman = top5PlayersDemoman;
+        this.sharedTimesSoldier = Object.entries(sharedSoldiers).map(
+          ([key, data]) => ({
+            playerId: data.player_id,
+            count: data.record_count,
+            playerName: data.player_name,
+          })
+        );
+        this.sharedTimesDemoman = Object.entries(sharedDemomans).map(
+          ([key, data]) => ({
+            playerId: data.player_id,
+            count: data.record_count,
+            playerName: data.player_name,
+          })
+        );
       } catch (error) {
         console.error("Error fetching shared top times:", error);
         throw error;
@@ -1187,6 +1481,7 @@ export default {
 .card-header {
   margin-bottom: 0;
   border-bottom: none;
+  color: var(--color-text);
 }
 
 .card-body.tabs-content {
@@ -1351,10 +1646,14 @@ export default {
 .chart-container {
   background: var(--color-dark);
   border-radius: 10px;
-  padding: 20px;
+  padding: 0 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   margin-bottom: 20px;
   color: #fff;
+}
+
+.chart-container .card-header {
+  padding-top: 20px;
 }
 
 .stats-boxes {

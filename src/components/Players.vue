@@ -442,7 +442,7 @@ export default {
       if (this.initialLoad) this.loading = true;
       try {
         const response = await axios.get(
-          `http://localhost:3000/players/${tableName}/${type}/${category}/${index}`
+          `http://localhost:3000/players/data/${tableName}/${type}/${category}/${index}`
         );
         const players = response.data;
         if (index === 0) {

@@ -6,6 +6,7 @@ import Players from './components/Players.vue';
 import PlayerPage from './components/PlayerPage.vue';
 import MapPage from './components/MapPage.vue';
 import Lookup from './components/Lookup.vue';
+import Donate from './components/Donate.vue';
 
 const routes = [
   {
@@ -43,6 +44,11 @@ const routes = [
     path: '/lookup',
     name: 'Lookup',
     component: Lookup
+  },
+  {
+    path: '/donate',
+    name: 'Donate',
+    component: Donate
   },
   {
     path: '/players/:playerId',
