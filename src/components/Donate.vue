@@ -7,7 +7,8 @@
       </div>
       <hr class="divider" />
       <p class="panel-description">
-        Your support helps me manage and upgrade the websites services
+        Your support helps me pay for server uptime and upgrade the websites
+        services
       </p>
       <div class="donation-options">
         <a

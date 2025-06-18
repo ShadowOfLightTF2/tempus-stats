@@ -429,7 +429,6 @@ export default {
       this.selectedCategory = category;
       this.selectedItem = item;
 
-      // Update the URL
       this.updateRoute(category, item);
 
       this.dropdownOpen = false;
@@ -454,29 +453,6 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching players");
-      } finally {
-        this.loading = false;
-        this.loadingSoldiers = false;
-        this.loadingDemomen = false;
-        this.initialLoad = false;
-      }
-    },
-    async fetchPlayersData(category, index) {
-      if (this.initialLoad) this.loading = true;
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/players/${category}/${index}`
-        );
-        const players = response.data;
-        if (index === 0) {
-          this.soldierPlayers = players[0];
-          this.demomanPlayers = players[1];
-        } else {
-          this.soldierPlayers = [...this.soldierPlayers, ...players[0]];
-          this.demomanPlayers = [...this.demomanPlayers, ...players[1]];
-        }
-      } catch (error) {
-        console.error("Error fetching players groups");
       } finally {
         this.loading = false;
         this.loadingSoldiers = false;

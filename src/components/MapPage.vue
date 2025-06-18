@@ -403,7 +403,7 @@ export default {
 }
 
 .back-button {
-  background: var(--color-primary);
+  background: var(--color-row);
   font-weight: bold;
   position: absolute;
   top: 10px;
@@ -411,7 +411,7 @@ export default {
 }
 
 .back-button:hover {
-  background: var(--color-dark);
+  background: var(--color-primary);
 }
 
 .stat-block {

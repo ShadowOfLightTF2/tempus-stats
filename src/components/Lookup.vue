@@ -327,7 +327,7 @@
                 <td>{{ getRecordType(record.type) }}</td>
                 <td>
                   <img
-                    :src="`/icons/${record.class}.png`"
+                    :src="`/tempus-plaza/icons/${record.class}.png`"
                     :alt="`${record.class}`"
                     class="class-icon"
                   />

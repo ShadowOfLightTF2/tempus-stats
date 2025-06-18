@@ -91,7 +91,7 @@
             <div class="row p-3 profile-overview">
               <div class="col-md-4 mb-3">
                 <div class="card stat-block h-100">
-                  <div class="card-body text-center">
+                  <div class="rank-card-body text-center">
                     <h3 class="card-title">Overall rank</h3>
                     <p class="card-text player-stats">
                       #{{ player.overall_rank }}
@@ -101,7 +101,7 @@
               </div>
               <div class="col-md-4 mb-3">
                 <div class="card stat-block h-100">
-                  <div class="card-body text-center">
+                  <div class="rank-card-body text-center">
                     <h3 class="card-title">Soldier rank</h3>
                     <p class="card-text player-stats">
                       #{{ player.soldier_rank }}
@@ -111,7 +111,7 @@
               </div>
               <div class="col-md-4 mb-3">
                 <div class="card stat-block h-100">
-                  <div class="card-body text-center">
+                  <div class="rank-card-body text-center">
                     <h3 class="card-title">Demoman rank</h3>
                     <p class="card-text player-stats">
                       #{{ player.demoman_rank }}
@@ -121,7 +121,7 @@
               </div>
               <div class="col-md-4 mb-3">
                 <div class="card stat-block h-100">
-                  <div class="card-body text-center">
+                  <div class="rank-card-body text-center">
                     <h3 class="card-title">Overall points</h3>
                     <p class="card-text player-stats">
                       {{ player.overall_points }}
@@ -131,7 +131,7 @@
               </div>
               <div class="col-md-4 mb-3">
                 <div class="card stat-block h-100">
-                  <div class="card-body text-center">
+                  <div class="rank-card-body text-center">
                     <h3 class="card-title">Soldier points</h3>
                     <p class="card-text player-stats">
                       {{ player.soldier_points }}
@@ -141,7 +141,7 @@
               </div>
               <div class="col-md-4 mb-3">
                 <div class="card stat-block h-100">
-                  <div class="card-body text-center">
+                  <div class="rank-card-body text-center">
                     <h3 class="card-title">Demoman points</h3>
                     <p class="card-text player-stats">
                       {{ player.demoman_points }}
@@ -156,8 +156,8 @@
       <div class="row">
         <div class="col-md-4">
           <div class="card chart-container">
-            <div class="card-header">
-              <h4 class="text-center mb-0">Soldier points history</h4>
+            <div class="chart-header">
+              <p class="section-header">Soldier points history</p>
             </div>
             <div class="card-body">
               <div v-if="loading.points" class="text-center">
@@ -177,8 +177,8 @@
         </div>
         <div class="col-md-4">
           <div class="card chart-container">
-            <div class="card-header">
-              <h4 class="text-center mb-0">Overall points history</h4>
+            <div class="chart-header">
+              <p class="section-header">Overall points history</p>
             </div>
             <div class="card-body">
               <div v-if="loading.points" class="text-center">
@@ -198,8 +198,8 @@
         </div>
         <div class="col-md-4">
           <div class="card chart-container">
-            <div class="card-header">
-              <h4 class="text-center mb-0">Demoman points history</h4>
+            <div class="chart-header">
+              <p class="section-header">Demoman points history</p>
             </div>
             <div class="card-body">
               <div v-if="loading.points" class="text-center">
@@ -224,8 +224,10 @@
           <!-- Soldier stats on the left -->
           <div class="stats-container">
             <div class="class-section">
-              <h3 class="section-header">Soldier stats (map)</h3>
               <div class="card stat-block mb-3">
+                <div class="card-header">
+                  <p class="section-header">Soldier stats (map)</p>
+                </div>
                 <div class="card-body">
                   <div v-if="loading.stats" class="text-center">
                     <div class="spinner-border text-light" role="status">
@@ -281,29 +283,68 @@
                 </div>
               </div>
             </div>
-            <div class="class-section">
-              <h5 class="section-header">{{ player.shared_soldier_type }}</h5>
+            <div
+              v-if="
+                stats.map.placement.soldier.G1 > 0 ||
+                stats.map.topTimesAmount.soldier > 0
+              "
+              class="class-section"
+            >
               <div class="card stat-block mb-3">
+                <div class="card-header">
+                  <p class="section-header">{{ player.shared_soldier_type }}</p>
+                </div>
                 <div class="card-body">
-                  <div class="row card-row">
+                  <div class="row shared-card-row">
                     <div v-if="loading.shared" class="text-center">
                       <div class="spinner-border text-light" role="status">
                         <span class="visually-hidden">Loading...</span>
                       </div>
                     </div>
-                    <div v-else>
+                    <div v-else class="shared-body">
+                      <!-- Header Row -->
+                      <div
+                        class="d-flex align-items-center justify-content-between px-2 mb-2"
+                        style="
+                          background-color: transparent;
+                          color: #aaa;
+                          font-size: 0.85rem;
+                          font-weight: 600;
+                        "
+                      >
+                        <div class="d-flex align-items-center">
+                          <i class="bi bi-people-fill me-2"></i>
+                          <span>Player</span>
+                        </div>
+                        <div class="text-end">Count</div>
+                      </div>
+
+                      <!-- Player Rows -->
                       <div
                         v-for="(sharedPlayer, index) in sharedTimesSoldier"
                         :key="index"
-                        class="col-md-12 text-center mb-3 stat-item clickable"
+                        class="d-flex align-items-center justify-content-between px-2 py-2 mb-2 shared-row"
                         @click="goToPlayer(sharedPlayer.playerId)"
                       >
-                        <h6 class="card-title clickable-text">
-                          {{ sharedPlayer.playerName }}
-                        </h6>
-                        <p class="card-text player-stats">
+                        <!-- Avatar + Name -->
+                        <div class="d-flex align-items-center shared-row-name">
+                          <img
+                            :src="sharedPlayer.avatar"
+                            alt="Avatar"
+                            class="rounded me-2 shared-avatar"
+                          />
+                          <span class="fw-semibold" style="font-size: 0.95rem">
+                            {{ sharedPlayer.playerName }}
+                          </span>
+                        </div>
+
+                        <!-- Count -->
+                        <div
+                          class="text-end fw-bold shared-count"
+                          style="min-width: 24px"
+                        >
                           {{ sharedPlayer.count }}
-                        </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -315,7 +356,7 @@
         <div class="col-md-6 tabs-container">
           <!-- Recent runs in the middle -->
           <div
-            class="card"
+            class="records-card"
             style="
               border: none;
               background: var(--color-dark);
@@ -354,63 +395,87 @@
                     <span class="visually-hidden">Loading records...</span>
                   </div>
                 </div>
-                <ul v-else class="list-group">
-                  <li
-                    v-for="record in currentRecords"
-                    :key="record.id"
-                    class="list-group-item record-item"
-                    style="background: var(--color-box)"
-                    @click="goToRecords(record.map_id)"
+                <div v-else>
+                  <div
+                    v-for="(group, date) in paginatedRecords"
+                    :key="date"
+                    class="date-group"
                   >
-                    <div class="d-flex align-items-center record-class-map">
-                      <img
-                        :src="`/icons/${record.class}.png`"
-                        :alt="record.class"
-                        class="class-icon"
-                        loading="lazy"
-                      />
-                      <span class="ms-2 record-map">
-                        {{ record.map_name }}
-                        <span v-if="record.type !== 'map'">
-                          - {{ record.type }} {{ record.index }}
-                        </span>
-                      </span>
+                    <div class="date-header">
+                      <h5>{{ formatDateHeader(date) }}</h5>
                     </div>
-                    <div class="text-end align-items-center record-time-detail">
-                      <div class="d-flex flex-column align-items-end">
-                        <div class="d-flex align-items-center gap-2">
-                          <span
-                            class="record-detail record-duration"
-                            :class="[
-                              record.rank >= 1 && record.rank <= 3
-                                ? getPlacementClass(record.rank)
-                                : '',
-                            ]"
-                          >
-                            {{ formatDuration(record.duration) }}
+                    <ul class="list-group">
+                      <li
+                        v-for="record in group"
+                        :key="record.id"
+                        class="list-group-item record-item"
+                        style="background: var(--color-box)"
+                        @click="goToRecords(record.map_id)"
+                      >
+                        <div class="d-flex align-items-center record-class-map">
+                          <img
+                            :src="`/tempus-plaza/icons/${record.class}.png`"
+                            :alt="record.class"
+                            class="class-icon"
+                            loading="lazy"
+                          />
+                          <span class="ms-2 record-map">
+                            {{ record.map_name }}
+                            <span v-if="record.type !== 'map'">
+                              - {{ record.type.slice(0, 1).toUpperCase()
+                              }}{{ record.index }}
+                            </span>
                           </span>
-                          <span
-                            class="record-rank"
-                            :class="getPlacementClass(record.placement)"
-                            >{{ getMedal(record.rank) }} #{{
-                              record.rank
-                            }}</span
-                          >
                         </div>
-                        <span class="record-detail record-date">{{
-                          formatDate(record.date)
-                        }}</span>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-                <button
-                  v-if="canShowMore"
-                  @click="loadMoreRecords"
-                  class="btn btn-dark update-button"
-                >
-                  Show More
-                </button>
+                        <div
+                          class="text-end align-items-center record-time-detail"
+                        >
+                          <div class="d-flex flex-column align-items-end">
+                            <div class="d-flex align-items-center gap-2">
+                              <span
+                                class="record-detail record-duration"
+                                :class="[
+                                  record.rank >= 1 && record.rank <= 3
+                                    ? getPlacementClass(record.rank)
+                                    : '',
+                                ]"
+                              >
+                                {{ formatDuration(record.duration) }}
+                              </span>
+                              <span
+                                class="record-rank"
+                                :class="getPlacementClass(record.placement)"
+                                >{{ getMedal(record.rank) }} #{{
+                                  record.rank
+                                }}</span
+                              >
+                            </div>
+                            <span class="record-detail record-date">
+                              {{ formatDate(record.date) }}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="pagination-controls">
+                    <button
+                      v-if="currentPage > 1"
+                      @click="prevPage"
+                      class="btn latest-runs-btn"
+                    >
+                      Previous
+                    </button>
+                    <div class="pagination-spacer"></div>
+                    <button
+                      v-if="currentPage * pageSize < filteredRecords.length"
+                      @click="nextPage"
+                      class="btn latest-runs-btn"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -419,8 +484,10 @@
           <!-- Demoman stats on the right -->
           <div class="stats-container">
             <div class="class-section">
-              <h3 class="section-header">Demoman stats (map)</h3>
               <div class="card stat-block mb-3">
+                <div class="card-header">
+                  <p class="section-header">Demoman stats (map)</p>
+                </div>
                 <div class="card-body">
                   <div v-if="loading.stats" class="text-center">
                     <div class="spinner-border text-light" role="status">
@@ -476,29 +543,68 @@
                 </div>
               </div>
             </div>
-            <div class="class-section">
-              <h5 class="section-header">{{ player.shared_demoman_type }}</h5>
+            <div
+              v-if="
+                stats.map.placement.demoman.G1 > 0 ||
+                stats.map.topTimesAmount.demoman > 0
+              "
+              class="class-section"
+            >
               <div class="card stat-block mb-3">
+                <div class="card-header">
+                  <p class="section-header">{{ player.shared_demoman_type }}</p>
+                </div>
                 <div class="card-body">
-                  <div class="row card-row">
+                  <div class="row shared-card-row">
                     <div v-if="loading.shared" class="text-center">
                       <div class="spinner-border text-light" role="status">
                         <span class="visually-hidden">Loading...</span>
                       </div>
                     </div>
-                    <div v-else>
+                    <div v-else class="shared-body">
+                      <!-- Header Row -->
+                      <div
+                        class="d-flex align-items-center justify-content-between px-2 mb-2"
+                        style="
+                          background-color: transparent;
+                          color: #aaa;
+                          font-size: 0.85rem;
+                          font-weight: 600;
+                        "
+                      >
+                        <div class="d-flex align-items-center">
+                          <i class="bi bi-people-fill me-2"></i>
+                          <span>Player</span>
+                        </div>
+                        <div class="text-end">Count</div>
+                      </div>
+
+                      <!-- Player Rows -->
                       <div
                         v-for="(sharedPlayer, index) in sharedTimesDemoman"
                         :key="index"
-                        class="col-md-12 text-center mb-3 stat-item clickable"
+                        class="d-flex align-items-center justify-content-between px-2 py-2 mb-2 shared-row"
                         @click="goToPlayer(sharedPlayer.playerId)"
                       >
-                        <h6 class="card-title clickable-text">
-                          {{ sharedPlayer.playerName }}
-                        </h6>
-                        <p class="card-text player-stats">
+                        <!-- Avatar + Name -->
+                        <div class="d-flex align-items-center shared-row-name">
+                          <img
+                            :src="sharedPlayer.avatar"
+                            alt="Avatar"
+                            class="rounded me-2 shared-avatar"
+                          />
+                          <span class="fw-semibold" style="font-size: 0.95rem">
+                            {{ sharedPlayer.playerName }}
+                          </span>
+                        </div>
+
+                        <!-- Count -->
+                        <div
+                          class="text-end fw-bold shared-count"
+                          style="min-width: 24px"
+                        >
                           {{ sharedPlayer.count }}
-                        </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -548,7 +654,7 @@ export default {
       rank_name: null,
       gender: "male",
       launcher_pref: 1,
-      rank_pref: "overall",
+      rank_pref: "",
       shared_soldier_type: "",
       shared_demoman_type: "",
     },
@@ -570,9 +676,9 @@ export default {
       worldRecords: [],
     },
     recordsDisplayed: {
-      "Latest runs": 11,
-      "Latest top times": 11,
-      "Latest world records": 11,
+      "Latest runs": 10,
+      "Latest top times": 10,
+      "Latest world records": 10,
     },
     tabs: ["Latest runs", "Latest top times", "Latest world records"],
     currentTab: "Latest runs",
@@ -585,6 +691,8 @@ export default {
       stats: true,
       points: true,
     },
+    currentPage: 1,
+    pageSize: 10,
     playerNotFound: false,
     stats: {
       total: {
@@ -785,45 +893,71 @@ export default {
     demomanChartSeries: [],
   }),
   computed: {
-    currentRecords() {
+    filteredRecords() {
       const tab = this.currentTab;
       if (tab === "Latest runs") {
-        return this.records.recentRecords.slice(0, this.recordsDisplayed[tab]);
+        return this.records.recentRecords;
       } else if (tab === "Latest top times") {
-        return this.records.topTimes.slice(0, this.recordsDisplayed[tab]);
+        return this.records.topTimes;
       } else if (tab === "Latest world records") {
-        return this.records.worldRecords.slice(0, this.recordsDisplayed[tab]);
+        return this.records.worldRecords;
       }
       return [];
     },
-    canShowMore() {
-      const tab = this.currentTab;
-      let recordsArray;
-      if (tab === "Latest runs") {
-        recordsArray = this.records.recentRecords;
-      } else if (tab === "Latest top times") {
-        recordsArray = this.records.topTimes;
-      } else if (tab === "Latest world records") {
-        recordsArray = this.records.worldRecords;
+    groupedRecords() {
+      const grouped = {};
+      this.filteredRecords.forEach((record) => {
+        const date = new Date(record.date * 1000).toDateString();
+        if (!grouped[date]) {
+          grouped[date] = [];
+        }
+        grouped[date].push(record);
+      });
+      return grouped;
+    },
+    paginatedRecords() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      const grouped = this.groupedRecords;
+      const dates = Object.keys(grouped);
+
+      const paginated = {};
+      let count = 0;
+
+      for (const date of dates) {
+        for (const record of grouped[date]) {
+          if (count >= start && count < end) {
+            if (!paginated[date]) {
+              paginated[date] = [];
+            }
+            paginated[date].push(record);
+          }
+          count++;
+        }
       }
-      return recordsArray && this.recordsDisplayed[tab] < recordsArray.length;
+
+      return paginated;
     },
   },
   async mounted() {
-    await Promise.all([
-      this.fetchUserData(this.playerId),
-      this.fetchPlayerData(this.playerId),
-      this.fetchPlayerRanks(this.playerId),
-      this.fetchPlayerStats(this.playerId),
-      this.fetchRecentRecords(this.playerId),
-      this.fetchSharedTimes(this.playerId),
-      this.fetchPlayerPoints(this.playerId),
-    ]);
+    try {
+      await Promise.all([
+        this.fetchUserData(this.playerId),
+        this.fetchPlayerData(this.playerId),
+        this.fetchPlayerRanks(this.playerId),
+        this.fetchRecentRecords(this.playerId),
+        this.fetchPlayerPoints(this.playerId),
+      ]);
+      await this.fetchPlayerStats(this.playerId);
+      await this.fetchSharedTimes(this.playerId);
+    } catch (error) {
+      console.error("Error during mounted operations:", error);
+    }
   },
   watch: {
     playerId: {
       immediate: false,
-      handler(newId, oldId) {
+      async handler(newId, oldId) {
         if (newId !== oldId) {
           this.playerNotFound = false;
           this.loading = {
@@ -837,21 +971,43 @@ export default {
           };
           this.recordsDisplayed = {
             ...this.recordsDisplayed,
-            "Latest runs": 11,
-            "Latest top times": 11,
-            "Latest world records": 11,
+            "Latest runs": 10,
+            "Latest top times": 10,
+            "Latest world records": 10,
           };
-          this.fetchPlayerData(newId);
-          this.fetchPlayerRanks(newId);
-          this.fetchPlayerStats(newId);
-          this.fetchRecentRecords(newId);
-          this.fetchSharedTimes(newId);
-          this.fetchPlayerPoints(newId);
+
+          try {
+            await Promise.all([
+              this.fetchPlayerData(newId),
+              this.fetchPlayerRanks(newId),
+              this.fetchRecentRecords(newId),
+              this.fetchPlayerPoints(newId),
+            ]);
+
+            await this.fetchPlayerStats(newId);
+            await this.fetchSharedTimes(newId);
+          } catch (error) {
+            console.error("Error during watch operations:", error);
+          }
         }
       },
     },
   },
   methods: {
+    nextPage() {
+      this.currentPage++;
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    formatDateHeader(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = date.toLocaleDateString("en-US", { month: "short" });
+      return `${day} ${month}`;
+    },
     async fetchPlayerPoints(playerId) {
       try {
         const response = await axios.get(
@@ -1260,92 +1416,74 @@ export default {
     },
     async fetchSharedTimes(playerId) {
       try {
-        let classType = "";
-        let placement = 10;
-        let sharedSoldiers = [];
-        let sharedDemomans = [];
+        const soldierTtCount = this.stats.map.topTimesAmount.soldier;
+        const demomanTtCount = this.stats.map.topTimesAmount.demoman;
+        const stats = {
+          soldier_maps_count: soldierTtCount,
+          demoman_maps_count: demomanTtCount,
+        };
 
-        try {
-          const responseStats = await axios.get(
-            `${API_BASE_URL}/players/${playerId}/tt-amount`
-          );
-          const stats = responseStats.data?.[0];
-
-          if (!stats) {
-            console.error("Stats response is invalid:", responseStats.data);
-            return;
+        const fetchSharedData = async (classType, placement, isGroupOne) => {
+          try {
+            const response = await axios.get(
+              `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
+            );
+            return response.data;
+          } catch (e) {
+            console.error(
+              `${classType} ${
+                isGroupOne ? "group1" : "top time"
+              } fetch failed:`,
+              e
+            );
+            return [];
           }
+        };
 
-          if (stats.soldier_maps_count === 0) {
-            try {
-              classType = "soldier";
-              placement = 11;
-              this.player.shared_soldier_type = "Group 1 buddies";
-              const responseSoldier = await axios.get(
-                `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
-              );
-              sharedSoldiers = responseSoldier.data;
-            } catch (e) {
-              console.error("Soldier group1 fetch failed:", e);
-            }
-          } else {
-            try {
-              classType = "soldier";
-              placement = 10;
-              this.player.shared_soldier_type = "Top time buddies";
-              const responseSoldier = await axios.get(
-                `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
-              );
-              sharedSoldiers = responseSoldier.data;
-            } catch (e) {
-              console.error("Soldier toptime fetch failed:", e);
-            }
-          }
+        const processClassData = async (
+          classType,
+          countProperty,
+          sharedTypeProperty,
+          groupOnePlacement
+        ) => {
+          const placement = stats[countProperty] === 0 ? groupOnePlacement : 10;
+          const isGroupOne = stats[countProperty] === 0;
+          this.player[sharedTypeProperty] = isGroupOne
+            ? "Shared group 1s"
+            : "Shared top times";
+          return await fetchSharedData(classType, placement, isGroupOne);
+        };
 
-          console.log("BRAAP");
-
-          if (stats.demoman_maps_count === 0) {
-            try {
-              classType = "demoman";
-              placement = 11;
-              this.player.shared_demoman_type = "Group 1 buddies";
-              const responseDemoman = await axios.get(
-                `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
-              );
-              sharedDemomans = responseDemoman.data;
-            } catch (e) {
-              console.error("Demoman group1 fetch failed:", e);
-            }
-          } else {
-            try {
-              classType = "demoman";
-              placement = 10;
-              this.player.shared_demoman_type = "Top time buddies";
-              const responseDemoman = await axios.get(
-                `${API_BASE_URL}/players/shared-names/${playerId}/${classType}/${placement}`
-              );
-              console.log(responseDemoman);
-              sharedDemomans = responseDemoman.data;
-            } catch (e) {
-              console.error("Demoman toptime fetch failed:", e);
-            }
-          }
-        } catch (e) {
-          console.error("General fetch error:", e);
-        }
+        const [sharedSoldiers, sharedDemomans] = await Promise.all([
+          processClassData(
+            "soldier",
+            "soldier_maps_count",
+            "shared_soldier_type",
+            11
+          ),
+          processClassData(
+            "demoman",
+            "demoman_maps_count",
+            "shared_demoman_type",
+            11
+          ),
+        ]);
 
         this.sharedTimesSoldier = Object.entries(sharedSoldiers).map(
-          ([key, data]) => ({
+          ([_, data]) => ({
             playerId: data.player_id,
             count: data.record_count,
             playerName: data.player_name,
+            avatar: data.avatar,
           })
         );
+
         this.sharedTimesDemoman = Object.entries(sharedDemomans).map(
-          ([key, data]) => ({
+          ([_, data]) => ({
             playerId: data.player_id,
             count: data.record_count,
             playerName: data.player_name,
+            avatar: data.avatar,
           })
         );
       } catch (error) {
@@ -1382,6 +1520,7 @@ export default {
 
 .update-button {
   margin-top: 10px;
+  margin-bottom: 10px;
   background: var(--color-primary);
   font-weight: bold;
   width: 100%;
@@ -1400,6 +1539,33 @@ export default {
   width: 96px;
   height: 96px;
   border: 3px solid #000e25;
+}
+
+.shared-avatar {
+  width: 25px;
+  height: 25px;
+  border: 2px solid var(--color-primary);
+}
+
+.shared-row {
+  background-color: var(--color-box);
+  color: var(--color-text-clickable);
+  cursor: pointer;
+}
+
+.shared-row:hover {
+  background-color: var(--color-primary);
+}
+
+.shared-row-name {
+  white-space: nowrap;
+  overflow: hidden;
+  width: 80%;
+}
+
+.shared-count {
+  color: var(--color-text);
+  font-weight: bold;
 }
 
 .profile-info {
@@ -1449,6 +1615,12 @@ export default {
   color: var(--color-text) !important;
 }
 
+.player-shared-stats {
+  color: var(--color-text) !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+}
+
 .stat-item {
   background: var(--color-box);
   border: 1px solid var(--color-background);
@@ -1464,14 +1636,16 @@ export default {
 }
 
 .section-header {
-  color: var(--color-primary);
+  color: var(--color-text);
+  font-size: 20px;
   font-weight: bold;
   text-align: center;
+  margin-bottom: 0;
 }
 
 .button-group {
   border-radius: 8px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-soft);
 }
 
 .toggle-btn {
@@ -1484,12 +1658,37 @@ export default {
   color: var(--color-text);
 }
 
-.card-body.tabs-content {
-  padding-top: 0;
+.card-header.tabs-header .button-group {
+  width: 100%;
+  display: flex;
+  padding: 0;
+  margin: 0;
+}
+
+.card-header.tabs-header .btn {
+  flex: 1;
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+}
+
+.card-body.tabs-content .records-section {
+  width: 100%;
+  padding: 0;
+}
+
+.card-body {
+  padding: 0px 10px !important;
 }
 
 .card-row {
+  padding: 0px 15px 10px 15px;
+}
+.rank-card-body {
   padding: 15px;
+}
+.shared-card-row {
+  padding: 5px 5px 5px 5px;
 }
 
 .list-group {
@@ -1498,6 +1697,7 @@ export default {
   gap: 10px;
   padding: 0;
   margin: 0;
+  width: 100%;
 }
 
 .list-group-item.record-item {
@@ -1508,11 +1708,22 @@ export default {
   border-radius: 8px;
   padding: 12px 16px;
   border: 1px solid var(--color-border-soft);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .list-group-item.record-item:hover {
   background: var(--color-primary) !important;
   cursor: pointer;
+}
+
+.card-body,
+.card-header {
+  padding: 10px;
+}
+
+.records-card {
+  padding: 5px 0px 0px 0px !important;
 }
 
 .completion-boxes,
@@ -1532,8 +1743,8 @@ export default {
 }
 
 .class-icon {
-  width: 24px;
-  height: 24px;
+  width: 24px !important;
+  height: 24px !important;
 }
 
 .record-map {
@@ -1583,6 +1794,37 @@ export default {
   gap: 2px;
   justify-items: end;
   min-width: 180px;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-bottom: 10px;
+}
+
+.pagination-spacer {
+  flex-grow: 1;
+}
+
+.latest-runs-btn {
+  background: var(--color-box);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-soft);
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.latest-runs-btn:hover {
+  color: var(--color-text);
+  background: var(--color-primary);
+}
+
+.date-header {
+  color: var(--color-text);
+  padding-top: 5px;
 }
 
 .placement-gold {
@@ -1646,14 +1888,16 @@ export default {
 .chart-container {
   background: var(--color-dark);
   border-radius: 10px;
-  padding: 0 12px;
+  padding: 0 5px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   margin-bottom: 20px;
   color: #fff;
 }
 
-.chart-container .card-header {
-  padding-top: 20px;
+.chart-header {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  color: var(--color-text);
 }
 
 .stats-boxes {
